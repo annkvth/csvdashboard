@@ -32,7 +32,8 @@ def line_plot(df):
 
         if not df_filtered.empty:
             # Create a trace for each column
-            trace = go.Scatter(x=df_filtered[x_axis_column], y=df_filtered[selected_column], mode='lines', name=f'{selected_column} over {x_axis_column}')
+            trace = go.Scatter(x=df_filtered[x_axis_column], y=df_filtered[selected_column],
+                               mode='lines', name=f'{selected_column} over {x_axis_column}')
             traces.append(trace)
         else:
             st.warning(f"No valid data to plot for {selected_column}.")
@@ -58,7 +59,8 @@ def histogram_1d(df):
 
     # Plot 1D histogram
     if not df_filtered.empty:
-        fig = px.histogram(df_filtered, x=selected_column_1d, title=f'1D Histogram of {selected_column_1d}')
+        fig = px.histogram(df_filtered, x=selected_column_1d,
+                           title=f'1D Histogram of {selected_column_1d}')
         st.plotly_chart(fig)
     else:
         st.warning(f"No valid data to plot for {selected_column_1d}.")
@@ -74,7 +76,8 @@ def histogram_2d(df):
 
     # Create a density heatmap for 2D histogram
     if not df_filtered.empty:
-        fig = go.Figure(go.Histogram2d(x=df_filtered[x_axis_column_2d], y=df_filtered[y_axis_column_2d], colorscale='Viridis'))
+        fig = go.Figure(go.Histogram2d(x=df_filtered[x_axis_column_2d],
+                                       y=df_filtered[y_axis_column_2d], colorscale='Viridis'))
         fig.update_layout(title=f'2D Histogram of {x_axis_column_2d} vs {y_axis_column_2d}',
                           xaxis_title=x_axis_column_2d,
                           yaxis_title=y_axis_column_2d)
@@ -94,7 +97,8 @@ def scatter_2d(df):
     # Plot 2D scatter plot using Plotly Graph Objects
     if not df_filtered.empty:
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df_filtered[x_axis_column_2d], y=df_filtered[y_axis_column_2d], mode='markers'))
+        fig.add_trace(go.Scatter(x=df_filtered[x_axis_column_2d],
+                                 y=df_filtered[y_axis_column_2d], mode='markers'))
         fig.update_layout(title=f'2D Scatter plot of {x_axis_column_2d} vs {y_axis_column_2d}',
                           xaxis_title=x_axis_column_2d,
                           yaxis_title=y_axis_column_2d)
@@ -107,7 +111,7 @@ def scatter_2d(df):
 # -------------------------------------
 # --- The Main function starts here ---
 # -------------------------------------
-    
+
 @st.cache_data
 def load_data(url):
     df = pd.read_csv(url)
@@ -132,10 +136,11 @@ with st.expander("CSV File Loading", expanded=True):
         st.write(df)
 
 
-        
+
 # Display tabs only if DataFrame is not empty
 if not df.empty:
-    tab1, tab2, tab3, tab4 = st.tabs(["Line Plot", "1D Histogram", "2D Histogram", "2D Scatter with Profiles"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Line Plot", "1D Histogram",
+                                      "2D Histogram", "2D Scatter with Profiles"])
 
     with tab1:
         st.header("Plot 1")
