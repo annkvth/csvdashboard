@@ -18,7 +18,7 @@ def line_plot(df):
     selected_columns = st.multiselect("Select columns for the y-axis:", df.columns)
 
     # Optional datetime conversion for x-axis
-    convert_to_datetime = st.checkbox("Convert x-axis column to datetime", value=True)
+    convert_to_datetime = st.checkbox("Convert x-axis column to datetime", value=False)
     if convert_to_datetime:
         df[x_axis_column] = pd.to_datetime(df[x_axis_column])
 
