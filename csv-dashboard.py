@@ -6,6 +6,12 @@ import plotly.graph_objects as go
 # Initialize df as a global variable
 df = pd.DataFrame()
 
+
+# -----------------------------------
+# --- Define different plot types ---
+# -----------------------------------
+
+
 def line_plot(df):
     # Get user input for x-axis and y-axis column selection
     x_axis_column = st.selectbox("Select a column for the x-axis:", df.columns)
@@ -16,65 +22,91 @@ def line_plot(df):
     if convert_to_datetime:
         df[x_axis_column] = pd.to_datetime(df[x_axis_column])
 
+    # Store traces in a list
+    traces = []
+
     # Plot the selected columns against the selected x-axis column
-    if selected_columns:
-        fig = px.line(df, x=x_axis_column, y=selected_columns, title=f'{", ".join(selected_columns)} over {x_axis_column}')
-        st.plotly_chart(fig)
-    else:
-        st.warning("Please select at least one column for plotting.")
+    for selected_column in selected_columns:
+        # Drop rows with NaN values in the selected column
+        df_filtered = df[[x_axis_column, selected_column]].dropna()
+
+        if not df_filtered.empty:
+            # Create a trace for each column
+            trace = go.Scatter(x=df_filtered[x_axis_column], y=df_filtered[selected_column], mode='lines', name=f'{selected_column} over {x_axis_column}')
+            traces.append(trace)
+        else:
+            st.warning(f"No valid data to plot for {selected_column}.")
+
+    # Create a single Plotly figure with all traces
+    fig = go.Figure(data=traces)
+
+    # Set layout
+    fig.update_layout(title=f'Overlay of {", ".join(selected_columns)} over {x_axis_column}',
+                      xaxis_title=x_axis_column,
+                      yaxis_title="Values")
+
+    # Display the combined plot
+    st.plotly_chart(fig)
+
 
 def histogram_1d(df):
     # Get user input for the column for 1D histogram
     selected_column_1d = st.selectbox("Select a column for 1D Histogram:", df.columns)
 
+    # Drop rows with NaN values in the selected column
+    df_filtered = df[selected_column_1d].dropna()
+
     # Plot 1D histogram
-    fig = px.histogram(df, x=selected_column_1d, title=f'1D Histogram of {selected_column_1d}')
-    st.plotly_chart(fig)
+    if not df_filtered.empty:
+        fig = px.histogram(df_filtered, x=selected_column_1d, title=f'1D Histogram of {selected_column_1d}')
+        st.plotly_chart(fig)
+    else:
+        st.warning(f"No valid data to plot for {selected_column_1d}.")
+
 
 def histogram_2d(df):
     # Get user input for x-axis and y-axis column selection for 2D histogram
     x_axis_column_2d = st.selectbox("Select a column for the x-axis (2D Histogram):", df.columns)
     y_axis_column_2d = st.selectbox("Select a column for the y-axis (2D Histogram):", df.columns)
 
+    # Drop rows with NaN values in the selected columns
+    df_filtered = df[[x_axis_column_2d, y_axis_column_2d]].dropna()
+
     # Create a density heatmap for 2D histogram
-    fig = go.Figure(go.Histogram2d(x=df[x_axis_column_2d], y=df[y_axis_column_2d], colorscale='Viridis'))
+    if not df_filtered.empty:
+        fig = go.Figure(go.Histogram2d(x=df_filtered[x_axis_column_2d], y=df_filtered[y_axis_column_2d], colorscale='Viridis'))
+        fig.update_layout(title=f'2D Histogram of {x_axis_column_2d} vs {y_axis_column_2d}',
+                          xaxis_title=x_axis_column_2d,
+                          yaxis_title=y_axis_column_2d)
+        st.plotly_chart(fig)
+    else:
+        st.warning(f"No valid data to plot for {x_axis_column_2d} vs {y_axis_column_2d}.")
 
-    # Update layout
-    fig.update_layout(title=f'2D Histogram of {x_axis_column_2d} vs {y_axis_column_2d}',
-                      xaxis_title=x_axis_column_2d,
-                      yaxis_title=y_axis_column_2d)
-
-    st.plotly_chart(fig)
 
 def scatter_2d(df):
-    # Get user input for x-axis and y-axis column selection for 2D histogram
+    # Get user input for x-axis and y-axis column selection for 2D scatter plot
     x_axis_column_2d = st.selectbox("Select a column for the x-axis (2D Scatter):", df.columns)
     y_axis_column_2d = st.selectbox("Select a column for the y-axis (2D Scatter):", df.columns)
 
-    # Plot 2D histogram using scatter plot
-    fig = px.scatter(df, x=x_axis_column_2d, y=y_axis_column_2d, marginal_x="histogram", marginal_y="histogram", title=f'2D Scatter plot of {x_axis_column_2d} vs {y_axis_column_2d}')
-    st.plotly_chart(fig)
+    # Drop rows with NaN values in the selected columns
+    df_filtered = df[[x_axis_column_2d, y_axis_column_2d]].dropna()
 
-#def select_and_plot(df):
-#    # Get user input for plot type
-#    plot_type = st.selectbox("Select plot type:", ["Line Plot", "1D Histogram", "2D Histogram", "2D Scatter with Profiles"])
-#
-#    # Plot based on the selected plot type
-#    if plot_type == "Line Plot":
-#        line_plot(df)
-#            
-#    elif plot_type == "1D Histogram":
-#        histogram_1d(df)
-#        
-#    elif plot_type == "2D Histogram":
-#        histogram_2d(df)
-#        
-#    elif plot_type == "2D Scatter with Profiles":
-#        scatter_2d(df)
-#
-#    else:
-#        st.warning("Invalid plot type selected.")
+    # Plot 2D scatter plot using Plotly Graph Objects
+    if not df_filtered.empty:
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=df_filtered[x_axis_column_2d], y=df_filtered[y_axis_column_2d], mode='markers'))
+        fig.update_layout(title=f'2D Scatter plot of {x_axis_column_2d} vs {y_axis_column_2d}',
+                          xaxis_title=x_axis_column_2d,
+                          yaxis_title=y_axis_column_2d)
+        st.plotly_chart(fig)
+    else:
+        st.warning(f"No valid data to plot for {x_axis_column_2d} vs {y_axis_column_2d}.")
 
+
+
+# -------------------------------------
+# --- The Main function starts here ---
+# -------------------------------------
     
 @st.cache_data
 def load_data(url):
@@ -83,6 +115,7 @@ def load_data(url):
 
 # Page title
 st.title("CSV Data Plotting App")
+
 
 # Expander for CSV file loading
 with st.expander("CSV File Loading", expanded=True):
@@ -98,6 +131,8 @@ with st.expander("CSV File Loading", expanded=True):
         st.write("### Data Preview:")
         st.write(df)
 
+
+        
 # Display tabs only if DataFrame is not empty
 if not df.empty:
     tab1, tab2, tab3, tab4 = st.tabs(["Line Plot", "1D Histogram", "2D Histogram", "2D Scatter with Profiles"])
